@@ -388,6 +388,16 @@ export class ObservableArray<T> extends StubArray {
 		this.$mobx.atom.reportObserved();
 		return Array.prototype.toLocaleString.apply(this.$mobx.values, arguments);
 	}
+
+	// See #734, in case property accessors are unreliable...
+	get(index: number): T {
+		return (ALL_INDEX_DESCRIPTORS[index].get as any).call(this);
+	}
+
+	// See #734, in case property accessors are unreliable...
+	set(index: number, value: T): void {
+		(ALL_INDEX_DESCRIPTORS[index].set as any).call(this, value);
+	}
 }
 
 declareIterator(ObservableArray.prototype, function() {
@@ -403,6 +413,7 @@ makeNonEnumerable(ObservableArray.prototype, [
 	"observe",
 	"clear",
 	"concat",
+	"get",
 	"replace",
 	"toJS",
 	"toJSON",
@@ -411,6 +422,7 @@ makeNonEnumerable(ObservableArray.prototype, [
 	"splice",
 	"push",
 	"pop",
+	"set",
 	"shift",
 	"unshift",
 	"reverse",
@@ -465,14 +477,18 @@ const ENTRY_0 = {
 	get: createArrayGetter(0)
 };
 
+const ALL_INDEX_DESCRIPTORS: PropertyDescriptor[] = [];
+
 function createArrayBufferItem(index: number) {
 	const set = createArraySetter(index);
 	const get = createArrayGetter(index);
-	Object.defineProperty(ObservableArray.prototype, "" + index, {
+	const descriptor = {
 		enumerable: false,
 		configurable: true,
 		set, get
-	});
+	};
+	ALL_INDEX_DESCRIPTORS[index] = descriptor;
+	Object.defineProperty(ObservableArray.prototype, "" + index, descriptor);
 }
 
 function createArraySetter(index: number) {
@@ -522,7 +538,7 @@ function createArrayGetter(index: number) {
 	};
 }
 
-function reserveArrayBuffer(max: number) {
+export function reserveArrayBuffer(max: number) {
 	for (let index = OBSERVABLE_ARRAY_BUFFER_SIZE; index < max; index++)
 		createArrayBufferItem(index);
 	OBSERVABLE_ARRAY_BUFFER_SIZE = max;

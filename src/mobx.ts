@@ -67,6 +67,7 @@ import { spyReport, spyReportEnd, spyReportStart, isSpyEnabled } from "./core/sp
 import { Lambda } from "./utils/utils";
 import { isComputingDerivation } from "./core/derivation";
 import { setReactionScheduler, onReactionError } from "./core/reaction";
+import { reserveArrayBuffer } from "./types/observablearray";
 
 export const extras = {
 	allowStateChanges,
@@ -79,6 +80,7 @@ export const extras = {
 	isComputingDerivation,
 	isSpyEnabled,
 	onReactionError,
+	reserveArrayBuffer, // See #734
 	resetGlobalState,
 	shareGlobalState,
 	spyReport,
