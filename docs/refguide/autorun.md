@@ -1,6 +1,6 @@
 # Autorun
 
-`mobx.autorun` can be used to create a function that runs whenever any of its dependencies change. It's useful for bridging from reactive to imperative code - for example, logging, persistence or code that updates a UI.
+`mobx.autorun` can be used to create a function that runs whenever any of its dependencies change. It's useful for bridging from reactive to imperative code - for example, logging, persistence or code that updates the UI.
 
 An `autorun` function always runs and cannot be observed - by contrast, `computed` functions only run when they have observers.
 
