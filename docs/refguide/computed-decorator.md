@@ -1,22 +1,12 @@
 # (@)computed
 
-Computed values are values that can be derived from the existing state or other computed values.
+Computed values are values that can be derived from the existing state or from other computed values.
 Conceptually, they are very similar to formulas in spreadsheets.
-Computed values can't be underestimated, as they help you to make your actual modifyable state as small as possible.
-Besides that they are higly optimized, so use them whereever possible.
+Computed values are very useful for making your application's state as small and simple as possible. They're highly optimized, and should be used wherever possible.
 
-Don't confuse `computed` with `autorun`. They are both reactively invoked expressions,
-but use `@computed` if you want to reactively produce a *value* that can be used by other observers and
-`autorun` if you don't want to produce a new value but rather want ot achieve an *effect*.
-For example imperative side effects like logging, making network requests etc.
+`computed` is different from `autorun`. Both react to changes in their dependencies, but `computed` produces a new value and `autorun` produces a side-effect. Computed values are also optimised - they only run if they have observers, and if the values on which they depend have changed - `autorun` functions are executed every time and cannot be observed.
 
-Computed values are automatically derived from your state if any value that affects them changes.
-Computed values can be optimized away in many cases by MobX as they are assumed to be pure.
-For example, a computed property won't re-run if none of the data used in the previous computation changed.
-Nor will a computed property re-run if is not in use by some other computed property or reaction.
-In such cases it will be suspended.
-
-This automatic suspension is very convenient. If a computed value is no longer observed, for example the UI in which it was used no longer exists, MobX can automatically garbage collect it. This differs from `autorun`'s values where you must dispose of them yourself.
+If a computed value is no longer observed, for example the UI in which it was used no longer exists, MobX can automatically garbage collect it. This differs from `autorun`'s values where you must dispose of them yourself.
 It sometimes confuses people new to MobX, that if you create a computed property but don't use it anywhere in a reaction, it will not cache it's value and recompute more often than seems necessary.
 However, in real life situations this by far the best default, and you can always forcefully keep a computed value awake if you need to by using either [`observe`](observe.md) or [`keepAlive`](https://github.com/mobxjs/mobx-utils#keepalive).
 
