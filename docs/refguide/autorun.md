@@ -1,15 +1,13 @@
 # Autorun
 
-`mobx.autorun` can be used in those cases where you want to create a reactive function that will never have observers itself.
-This is usually the case when you need to bridge from reactive to imperative code, for example for logging, persistence or UI-updating code.
-When `autorun` is used, the provided function will always be triggered when one of its dependencies changes.
-In contrast, `computed(function)` creates functions that only re-evaluate if it has
-observers on its own, otherwise its value is considered to be irrelevant.
-As a rule of thumb: use `autorun` if you have a function that should run automatically but that doesn't result in a new value.
-Use `computed` for everything else. Autoruns are about initiating _effects_, not about producing new values.
+`mobx.autorun` can be used to create a function that runs whenever any of its dependencies change. It's useful for bridging from reactive to imperative code - for example, logging, persistence or code that updates a UI.
+
+An `autorun` function always runs and cannot be observed - by contrast, `computed` functions only run when they have observers.
+
+As a rule of thumb: use `autorun` if you have a function that should run automatically, but which doesn't calculate or return anything. Use `computed` for everything else; autoruns are about initiating _effects_, not about producing new values.
 If a string is passed as first argument to `autorun`, it will be used as debug name.
 
-The function passed to autorun will receive one argument when invoked, the current reaction (autorun), which can be used to dispose the autorun during execution.
+The function passed to autorun will receive one argument when invoked, the current reaction (autorun), which can be used to dispose of the autorun during execution. `autorun` also returns this function, so you can dispose of the autorun.
 
 Just like the [`@observer` decorator/function](./observer-component.md), `autorun` will only observe data that is used during the execution of the provided function.
 
@@ -17,24 +15,23 @@ Just like the [`@observer` decorator/function](./observer-component.md), `autoru
 var numbers = observable([1,2,3]);
 var sum = computed(() => numbers.reduce((a, b) => a + b, 0));
 
-var disposer = autorun(() => console.log(sum.get()));
+var dispose = autorun(() => console.log(sum.get()));
 // prints '6'
 numbers.push(4);
 // prints '10'
 
-disposer();
+dispose();
 numbers.push(5);
 // won't print anything, nor is `sum` re-evaluated
 ```
 
 ## Error handling
 
-Exceptions thrown in autorun and all other types reactions are catched and logged to the console, but not propagated back to the original causing code.
-This is to make sure that a reaction in one exception does not prevent the scheduled execution of other, possibly unrelated, reactions.
+Exceptions thrown in autorun and all other types of reactions are caught and logged to the console, but are not propagated back to the original code. This is to make sure that an exception in one reaction does not prevent the scheduled execution of other reactions.
 This also allows reactions to recover from exceptions; throwing an exception does not break the tracking done by MobX,
-so as subsequent run of a reaction might complete normally again if the cause for the exception is removed.
+so the reaction may complete normally the next time it is run if whatever caused the exception is fixed by then.
 
-It is possible to override the default logging behavior of Reactions by calling the `onError` handler on the disposer of the reaction.
+However, you can override the default logging behavior of Reactions by calling the `onError` handler on the disposer of the reaction.
 Example:
 
 ```javascript
@@ -53,7 +50,7 @@ dispose.onError(e => {
     window.alert("Please enter a valid age")
 })
 
-age.set(-5)  // Shows alert bolx
+age.set(-5)  // Shows alert box
 ```
 
 A global onError handler can be set as well through `extras.onReactionError(handler)`. This can be useful in tests or for monitoring.
